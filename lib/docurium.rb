@@ -287,11 +287,11 @@ class Docurium
       @data[:types].each_with_index do |tdata, i|
         type, typeData = tdata
         @data[:types][i][1][:used] ||= {:returns => [], :needs => []}
-        if fdata[:return][:type].index(/#{type}[ ;\)\*]/)
+        if fdata[:return][:type].index(/#{Regexp.escape(type)}[ ;\)\*]/)
           @data[:types][i][1][:used][:returns] << func
           @data[:types][i][1][:used][:returns].sort!
         end
-        if fdata[:argline].index(/#{type}[ ;\)\*]/)
+        if fdata[:argline].index(/#{Regexp.escape(type)}[ ;\)\*]/)
           @data[:types][i][1][:used][:needs] << func
           @data[:types][i][1][:used][:needs].sort!
         end
@@ -345,11 +345,11 @@ class Docurium
       elsif m = /\}(.*?);/.match(line)
         if !m[1].strip.empty?
           name = m[1].strip
+          name = name.gsub('*', '').strip
+          @data[:types][name] = {:block => block, :tdef => tdef, :type => type, :value => val, :file => filepath, :line => linestart, :lineto => lineno}
+          in_block = false
+          block = ''
         end
-        name = name.gsub('*', '').strip
-        @data[:types][name] = {:block => block, :tdef => tdef, :type => type, :value => val, :file => filepath, :line => linestart, :lineto => lineno}
-        in_block = false
-        block = ''
       elsif in_block
         block += line + "\n"
       end
